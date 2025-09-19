@@ -1,0 +1,10 @@
+fullnameOverride: ${name}
+replicaCount: ${replicas}
+clusterName: ${cluster_name}
+region: ${aws_region}
+vpcId: ${aws_vpc}
+enableServiceMutatorWebhook: "false"
+serviceAccount:
+  name: "${service_account}"
+  annotations:
+    eks.amazonaws.com/role-arn: "${role_arn}"

@@ -1,0 +1,26 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: jwt-credentials
+  namespace: supabase
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: secret-store
+    kind: SecretStore
+  target:
+    name: supabase-jwt
+  data:
+    - secretKey: secret
+      remoteRef:
+        key: "production-supabase-jwt"
+        property: secret
+    - secretKey: anonKey
+      remoteRef:
+        key: "production-supabase-jwt"
+        property: anonKey
+    - secretKey: serviceKey
+      remoteRef:
+        key: "production-supabase-jwt"
+        property: serviceKey

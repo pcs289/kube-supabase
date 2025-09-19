@@ -1,0 +1,20 @@
+---
+dnsPolicy: Default
+logLevel: debug
+replicas: "${replicas}"
+controller:
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+serviceAccount:
+  name: "${sa_name}"
+  annotations:
+    eks.amazonaws.com/role-arn: "${role_arn}"
+settings:
+  clusterName: "${cluster_name}"
+  clusterEndpoint: "${cluster_endpoint}"
+  interruptionQueue: "${queue_name}"

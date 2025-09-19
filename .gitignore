@@ -1,0 +1,9 @@
+## Generic
+.DS_Store
+secrets.json
+
+## Terraform
+.terraform/
+*.tfvars
+*.tfstate*
+.terraform*

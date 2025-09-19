@@ -1,0 +1,334 @@
+externalSecrets:
+  secretStore:
+    region: us-east-1
+    roleArn: arn:aws:iam::848866177623:role/production-secret-store
+  serviceAccount:
+    name: secret-store
+    namespace: supabase
+
+supabase:
+  secret:
+    # jwt will be used to reference secret in multiple services:
+    # Anon & Service key: Studio, Storage, Kong
+    # JWT Secret: Analytics, Auth, Rest, Realtime, Storage
+    jwt:
+      secretRef: "supabase-jwt"
+    # database credentials
+    # these fields must be provided even if using external database
+    db:
+      secretRef: "supabase-db"
+    # secret used to access the studio dashboard
+    # leave it empty to disable dashboard authentication
+    dashboard:
+      username: "root"
+      password: "toor"
+    # S3 credentials for storage object bucket
+    s3:
+      secretRef: "supabase-s3"
+
+  # Studio Application
+  studio:
+    enabled: true
+    image:
+      repository: supabase/studio
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+    service:
+      type: ClusterIP
+      port: 3000
+    environment:
+      STUDIO_DEFAULT_ORGANIZATION: KubeSupabase
+      STUDIO_DEFAULT_PROJECT: KubeSupabaseProject
+      STUDIO_PORT: "3000"
+      SUPABASE_PUBLIC_URL: http://localhost
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_ENABLE_LOGS: "true"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Auth Service
+  auth:
+    # Enable auth provisioning
+    enabled: true
+    image:
+      repository: supabase/gotrue
+      pullPolicy: IfNotPresent
+      tag: "v2.179.0"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+    service:
+      type: ClusterIP
+      port: 9999
+    environment:
+      DB_HOST: production-database.cxxf0tq94bq3.us-east-1.rds.amazonaws.com
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_DRIVER: postgres
+      DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
+      API_EXTERNAL_URL: http://example.com
+      GOTRUE_API_HOST: "0.0.0.0"
+      GOTRUE_API_PORT: "9999"
+      GOTRUE_SITE_URL: http://example.com
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_LOG_LEVEL: DEBUG
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_SMS_AUTOCONFIRM: "true"
+      GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
+    envFrom: []
+      # - secretRef:
+      #     name: env-secret
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Rest Service
+  rest:
+    # Enable postgrest provisioning
+    enabled: true
+    image:
+      repository: postgrest/postgrest
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    podAnnotations: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+    service:
+      type: ClusterIP
+      port: 3000
+    environment:
+      DB_HOST: production-database.cxxf0tq94bq3.us-east-1.rds.amazonaws.com
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_DRIVER: postgres
+      DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_DB_USE_LEGACY_GUCS: false
+      PGRST_APP_SETTINGS_JWT_EXP: 3600
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Realtime Service
+  realtime:
+    enabled: false
+
+  # Meta Service
+  meta:
+    enabled: true
+    image:
+      repository: supabase/postgres-meta
+      pullPolicy: IfNotPresent
+      tag: "v0.91.6"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+    service:
+      type: ClusterIP
+      port: 8080
+    environment:
+      DB_HOST: production-database.cxxf0tq94bq3.us-east-1.rds.amazonaws.com
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_DRIVER: postgres
+      DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
+      PG_META_PORT: "8080"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Storage Service
+  storage:
+    # Enable storage provisioning
+    enabled: true
+    image:
+      repository: supabase/storage-api
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    securityContext: {}
+    service:
+      type: ClusterIP
+      port: 5000
+    environment:
+      LOG_LEVEL: debug
+      DB_HOST: production-database.cxxf0tq94bq3.us-east-1.rds.amazonaws.com
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_DRIVER: postgres
+      DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
+      PGOPTIONS: -c search_path=storage,public
+      FILE_SIZE_LIMIT: "52428800"
+      STORAGE_BACKEND: file  # file, s3
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      # Set variables below and secret.s3 above to enable S3 storage bucket
+      # If using this chart's minio, skip the endpoint and protocol below
+      # GLOBAL_S3_ENDPOINT: http://minio:9000
+      # GLOBAL_S3_PROTOCOL: http
+      # GLOBAL_S3_FORCE_PATH_STYLE: true
+      # AWS_DEFAULT_REGION: stub
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    persistence:
+      enabled: true
+      storageClassName: "gp3"
+      size: 10Gi
+      accessModes:
+        - ReadWriteOnce
+      class: ""
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Kong
+  kong:
+    enabled: true
+    image:
+      repository: kong
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1 ## Set to at least 3 for production
+    livenessProbe: {}
+    readinessProbe: {}
+    service:
+      type: ClusterIP
+      port: 8000
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+      # https://github.com/supabase/cli/issues/14
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      KONG_LOG_LEVEL: warn
+    ingress:
+      enabled: false
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1 ## Set to at least 3 for production
+      maxReplicas: 100
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    affinity: {} ## Add AntiPodAffinity to spread across AZs
+
+  # Disabled since we are using RDS
+  db:
+    enabled: false
+
+  # Disabled since we don't need it
+  imgproxy:
+    enabled: false
+
+  # Disabled since we don't need it
+  analytics:
+    enabled: false
+
+  # Disabled since we don't need it
+  vector:
+    enabled: false
+
+  # Disabled since we don't need it
+  functions:
+    enabled: false
+
+  # Disabled since we are using S3
+  minio:
+    enabled: false

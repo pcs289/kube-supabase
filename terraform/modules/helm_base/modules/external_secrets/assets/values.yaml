@@ -1,0 +1,5 @@
+serviceAccount:
+  name: "${service_account}"
+  namespace: "${namespace}"
+  annotations:
+    eks.amazonaws.com/role-arn: "${role_arn}"

@@ -1,0 +1,22 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: s3-credentials
+  namespace: supabase
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: secret-store
+    kind: SecretStore
+  target:
+    name: supabase-s3
+  data:
+    - secretKey: keyId
+      remoteRef:
+        key: "production-supabase-s3"
+        property: keyId
+    - secretKey: accessKey
+      remoteRef:
+        key: "production-supabase-s3"
+        property: accessKey

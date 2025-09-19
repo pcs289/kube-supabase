@@ -1,0 +1,61 @@
+##################
+### Global
+##################
+environment = "production"
+
+##########
+### EKS
+##########
+cluster_name    = "production-cluster"
+cluster_cidr    = "10.100.0.0/16"
+cluster_version = "1.33"
+
+##################
+### Networking
+##################
+vpc_cidr_block = "10.0.0.0/16"
+vpc_single_nat = true
+
+allow_ssh_cidrs = [
+  "MY_IP/32",
+]
+
+allow_ssh_keys = [
+  "ssh-rsa SSH PUBLIC KEY"
+]
+
+################
+#### RDS
+################
+db_identifier     = "production-database"
+db_instance_class = "db.t3.small"
+db_master_user    = "postgres"
+
+db_engine         = "postgres"
+db_engine_version = "17.2"
+
+db_storage     = 20
+db_max_storage = 50
+
+db_params = [
+  { name = "client_encoding", value = "utf8" },
+  { name = "rds.force_ssl", value = "0" }
+]
+
+################
+#### S3
+################
+bucket_name      = "supabase-s3"
+bucket_encrypted = true
+bucket_versioned = false
+
+################
+#### Secrets
+################
+secretstore_name = "production-secret-store"
+secrets = {
+  RDS_MASTER_PASSWORD = "AQICAHj3kt11FyMkBFq9BJf21KPkrQwRdP9VrnJllpQN5qw59gGAGyKI+HkShsXdiudjLxvdAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMkOAEEfWN7x375Z1aAgEQgDuQp9+Tt264UNcAgM4Y+lBDUTszVDCJaK7ugZktyKNUWNUI1pCjHCVO5WG063m7qWsdLV+9kJJHXYTIVg=="
+  SUPABASE_DB         = "AQICAHj3kt11FyMkBFq9BJf21KPkrQwRdP9VrnJllpQN5qw59gGX2yCZHJ0Cvs2Z78DZdTNsAAAA/jCB+wYJKoZIhvcNAQcGoIHtMIHqAgEAMIHkBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDGjRX6mFcVodtdRg7wIBEICBtsr0wNUX4seDLzvvXdSxx2isZxfmSur3TVjkHIwBu2DOrA6v4wZr8dlyulrY1XgXf+BO/7eehAdlKmESGn7Efbi0vgNFpG1zWTWW3QY6p2dYbd8+rd4Ay8F362W0fTiiAqPfcHODSibObAUVHyDducKYcUX+LVrire21qTT48Zob2jqAi9JeqEThjkRhpT24JX96X6pcXbI7n6JuPEbDJc5dySTSfo4lYmL3MeQEmVDklG6IwbHx"
+  SUPABASE_JWT        = "AQICAHj3kt11FyMkBFq9BJf21KPkrQwRdP9VrnJllpQN5qw59gHVjZCcgExxZKj0zKhhq3y8AAACFDCCAhAGCSqGSIb3DQEHBqCCAgEwggH9AgEAMIIB9gYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAz3UErSBvMzYiDFXHECARCAggHHWH8437I7NZp6AaVIy1SS6ttYg3jqW6ra+rS2iWQDgjqG3L/9DHmebJs8juleeULvmMTEdjTqq7K2s5puACGVgxWfft0vY9VGLUSuXqKrhb3HDsOu/534A62lkfiJFBXPPYZ5AOn39L7DY9OFyArEONFsxfnoqdIciROzAhtPU9fOlRMLQAnsXi2ysP2sztV+h4jY3j1L3T+P1OvmBrtQBobXfr0uyI1JgNzs3WPjY8mTgFjL/jvoIqMZ8qyUQVFiGIXE6GnqSSPDvtIWDrxZL1vjXs9eVvSKhalS9wxw7Gy/iio7ujSsvzbNpClNszkd/ge2/tGkXXv5Pbk4uzlWZAY6npdlDv4kc18lJJdIe8h1YhOkeXYcIZJ/QK6w386+KFig/Dfuvo5+tlOsk855qM5wd0J7kusW9Ah8ijkh8gBLOJMZkgHYLeA6+BqH+sic3JjHaZDxgwyGpi8PXMPEOXCaVftl/Vv0kgJQHYMrIwc0mid2hoUui1OTJAi6uFQ701mXEUajHiVItU7FlsrrPlz+hvwC7R2x30eITA10MVeLWXmMEs6ObU8RSwVucd3v+dmRWyW3/zHE5Gk+ndBSYSDgwjutXnM="
+  SUPABASE_DASHBOARD  = "AQICAHj3kt11FyMkBFq9BJf21KPkrQwRdP9VrnJllpQN5qw59gG+GwIlmp4KVfbIdF5q4wIIAAAAizCBiAYJKoZIhvcNAQcGoHsweQIBADB0BgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDCcySmsAwj7PmA5yMQIBEIBHzS53QN1NmvjHOjRZWBoT/d3EjGcbcfmd1VxtFf8U5WgR1beQjuOcpP9mtZQrxJgOIBsqcbSiU3fWFc/wF+kVX217q8secFQ="
+}

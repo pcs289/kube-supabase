@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-config
+  namespace: haproxy
+data:
+  haproxy.cfg: |
+    global
+      log 127.0.0.1 local0
+      maxconn 2048
+      daemon
+      stats socket /tmp/haproxy
+
+    defaults
+      log global
+      mode tcp
+      timeout connect 10s
+      timeout client 1m
+      timeout server 1m
+
+    # Supabase Studio
+    frontend studio
+      bind *:3000
+      default_backend studio
+
+    backend studio
+      server studio supabase-supabase-studio.supabase.svc.cluster.local:3000
+
+    # Production Database
+    frontend postgres
+      bind *:5432
+      default_backend postgres
+
+    backend postgres
+      server postgres production-database.cxxf0tq94bq3.us-east-1.rds.amazonaws.com:5432

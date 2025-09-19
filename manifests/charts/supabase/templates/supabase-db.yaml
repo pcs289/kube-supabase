@@ -1,0 +1,30 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rds-credentials
+  namespace: supabase
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: secret-store
+    kind: SecretStore
+  target:
+    name: supabase-db
+  data:
+    - secretKey: database
+      remoteRef:
+        key: production-supabase-db
+        property: database
+    - secretKey: username
+      remoteRef:
+        key: production-supabase-db
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: production-supabase-db
+        property: password
+    - secretKey: password_encoded
+      remoteRef:
+        key: production-supabase-db
+        property: password_encoded

@@ -1,0 +1,22 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: dashboard-credentials
+  namespace: supabase
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: secret-store
+    kind: SecretStore
+  target:
+    name: supabase-dashboard
+  data:
+    - secretKey: username
+      remoteRef:
+        key: "production-supabase-dashboard"
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: "production-supabase-dashboard"
+        property: password
