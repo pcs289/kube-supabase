@@ -13,7 +13,7 @@ Since **RDS is deployed in private subnets** and no bastion host is configured f
 Run an Alpine-based debugging container inside the cluster:
 
 ```bash
-kubectl run --image=alpine -it debug --rm -- sh
+./config.sh debug
 ```
 
 * The debug pod is ephemeral (`--rm` flag) and will be removed after you exit.
@@ -52,3 +52,16 @@ Execute schema initialization scripts:
 
 * Open the `sql/` folder in your project.
 * Copy-paste the content of each script **in order** into the `psql` shell.
+
+## Local Access to private RDS
+
+An  [haproxy](https://haproxy.com) is deployed (`manifests/environments/production/haproxy`) to connect to private RDS Postgres instance. You can portforward from `haproxy:5432` Service into `localhost:5432` and then use your favourite Postgres client to connect to the private RDS database.
+
+```shell
+kubectl port-forward -n haproxy svc/haproxy 5432:5432 
+```
+
+## References
+
+- [supabase-postgres SQL Schema Potsgres17](https://github.com/supabase/postgres/blob/develop/migrations/schema-17.sql)
+- [pgjwt](https://github.com/michelp/pgjwt/blob/master/pgjwt--0.2.0.sql)

@@ -193,11 +193,19 @@ case "$COMMAND" in
         ;;
     "cleanup")
         cleanup
-        ;;  
+        ;;
     "smoke")
         echo "🚬 Smoke testing app: ${APP_NAME}, environment: ${DEFAULT_ENV}"
+        # echo "Portforward supabase-kong from Cluster"
+        # kubectl port-forward svc/supabase-supabase-kong 8000:8000 -n supabase &
+        # pf_pid=$!
+        # sleep 2
+        echo "Getting anonKey from SecretsManager"
         TOKEN=$(aws secretsmanager get-secret-value --secret-id ${SECRET_ID} | jq -r '.SecretString | fromjson | .anonKey')
+        echo "Trying Supabase access with anonKey at /rest/v1 endpoint"
         curl -i -H "Authorization: Bearer ${TOKEN}" -H "api_key: ${TOKEN}" localhost:8000/rest/v1
+        # kill -n $pf_id
+        # wait $pf_pid 2>/dev/null
         ;;
     "encrypt")
         echo "🔒 Encrypting Secret for ${DEFAULT_ENV}"
