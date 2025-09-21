@@ -29,5 +29,11 @@ module "alb_controller" {
   environment       = var.environment
   oidc_provider_arn = var.oidc_provider_arn
   vpc_id            = var.vpc_id
+}
 
+module "vm" {
+  source = "./modules/victoria-metrics"
+
+  cluster_name = var.cluster_name
+  environment  = var.environment
 }

@@ -2,17 +2,29 @@
 
 Since the project is still in progress, here are some screenshots.
 
-## VPC Layout
-![VPC](img/vpc.png)
+## Smoke Test
 
-## EKS Access
-![EKS](img/eks.png)
+Test with `curl` to  `/rest/v1/` endpoint with `200 OK` response
 
-## IAM Roles
-![IAM](img/iam.png)
+![Smoke Test](img/smoke.png)
 
-## Secrets Manager
-![SecretsManager](img/secretManager.png)
+## Kubernetes Cluster
+
+Kubernetes pods visualised in `k9s` TUI
+
+![Kubernetes Cluster](img/cluster.png)
+
+## Supabase Studio
+
+Supabase Studio WebUI on web browser.
+
+![Supabase Studio](img/supabase-studio.png)
+
+## Observability Stack
+
+Dashboards and alerts for logs and metrics provided by the observability stack (VictoriaMetrics, Grafana, Loki)
+
+![Grafana Dashboard](img/grafana.png)
 
 ## RDS Postgres
 ![RDS](img/rds.png)
@@ -20,8 +32,14 @@ Since the project is still in progress, here are some screenshots.
 ## S3 Object Store
 ![S3](img/s3.png)
 
-## Kubernetes Cluster
-![Kubernetes Cluster](img/cluster.png)
+## IAM Roles
+![IAM](img/iam.png)
 
-## Supabase Studio
-![Supabase Studio](img/supabase-studio.png)
+## Secrets Manager
+![SecretsManager](img/secretManager.png)
+
+## EKS Access
+![EKS](img/eks.png)
+
+## VPC Layout
+![VPC](img/vpc.png)

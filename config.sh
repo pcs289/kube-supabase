@@ -203,7 +203,7 @@ case "$COMMAND" in
         echo "Getting anonKey from SecretsManager"
         TOKEN=$(aws secretsmanager get-secret-value --secret-id ${SECRET_ID} | jq -r '.SecretString | fromjson | .anonKey')
         echo "Trying Supabase access with anonKey at /rest/v1 endpoint"
-        curl -i -H "Authorization: Bearer ${TOKEN}" -H "api_key: ${TOKEN}" localhost:8000/rest/v1
+        curl -i -H "apikey: ${TOKEN}" http://localhost:8000/rest/v1/
         # kill -n $pf_id
         # wait $pf_pid 2>/dev/null
         ;;

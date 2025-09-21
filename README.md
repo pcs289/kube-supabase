@@ -94,6 +94,44 @@ To destroy all provisioned cloud resources, use the tear-down command:
   * **Challenges & Learnings**: Read about the challenges we faced and the key learnings from this project on the [Challenges](docs/Challenges.md) documentation page.
   * **Real Deployment Screenshots**: A specific page with screenshots is available on [Screenshots](docs/Screenshots.md)
 
+---
+
+### AWS RDS `pg_authid` limitation
+
+Since AWS customizes Postgres deployments to offer RDS service on top as management layer, they have a custom Postgres authorization role `rds_superadmin`. In our case, Supabase is mainly deployed with a custom Postgres container through Docker Compose or self-hosted on a Virtual Machine (i.e EC2 instance).
+
+The catalog pg_authid contains information about database authorization identifiers (roles). Due to the managed nature of RDS as a service, unfortunately it is not possible to have the full superuser role in RDS.
+
+This SQL query which shows the privileges `rds_superuser`/`master` user has on each catalog:
+
+```sql
+SELECT 
+  relname,
+  has_table_privilege('rds_superuser',relname,'SELECT') AS SELECT,
+  has_table_privilege('rds_superuser',relname,'UPDATE') AS UPDATE,
+  has_table_privilege('rds_superuser',relname,'INSERT') AS INSERT,
+  has_table_privilege('rds_superuser',relname,'TRUNCATE') AS truncate
+FROM pg_class c , pg_namespace n
+WHERE n.oid = c.relnamespace  AND n.nspname IN ('pg_catalog') AND relkind='r';
+```
+
+The above query shows RDS superadmin user does not have any priviledge over `pg_authid` catalog.
+
+![pg_authid](docs/img/pg_authid.png)
+
+The official repository for `supabase-meta` service uses the native `pg_authid` catalog to 
+
+![pg_authid-meta](docs/img/pg_authid-meta.png)
+
+> [!WARNING]
+> There is no native way to integrate Supabase using an external RDS as Postgres backend.
+
+
+References: 
+  - https://stackoverflow.com/a/55459113
+  - https://github.com/supabase/postgres-meta/blob/master/src/lib/sql/column_privileges.sql.ts
+
+
 -----
 
 ### Future Improvements
